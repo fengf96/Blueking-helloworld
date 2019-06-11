@@ -1,0 +1,64 @@
+<span class="label label-lg label-success arrowed-right  t_b">dropdownlist</span>
+<div class="pb5 pt5">
+    <label for="drop_before" class="ml5">前台数据：</label>
+    <input type="text" id="drop_before" name="drop_before" style="width:150px"/>
+</div>
+<div class="pb5 pt5">
+    <label for="drop_before_filter" class="ml5">初始加载：</label>
+    <input type="text" id="drop_before_filter" name="drop_before_filter" style="width:150px"/>
+</div>
+<div class="pb5 pt5">
+    <label for="drop_filter_click" class="ml5">点击加载：</label>
+    <input type="text" id="drop_filter_click" name="drop_filter_click" style="width:150px"/>
+</div>
+ 
+<script>
+$(function(){
+	//前台数据
+	var data_source = ${person_list};
+	$("#drop_before").kendoDropDownList({
+    	dataTextField: 'city', 
+    	dataSource: data_source,
+        filter: "startswith", 
+        optionLabel: "数据由模版参数提供",
+        separator: ", ",
+        height: 200, 
+        minLength: 1
+	});
+	   
+	//ajax 请求数据，前台过滤
+	$("#drop_before_filter").kendoDropDownList({
+    	dataTextField: 'city', 
+    	dataSource: {
+	        transport: {
+	        	read: {
+	        		url:site_url+'kendo_crud/form_sample/autocomplete_filter_by_before/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+	                dataType:'json' //'jsonp'为跨域请求json数据(url为跨域链接)
+	        	}
+	        }
+       	},
+        optionLabel: "初始加载请求到的数据",
+        separator: ", ",
+        height: 200, 
+        minLength: 1
+	});
+	
+	//ajax 请求数据，前台过滤
+	var drop_test = $("#drop_filter_click").kendoDropDownList({
+	    autoBind: false,
+    	dataTextField: 'city', 
+        optionLabel: "点击加载请求到的数据",
+        dataSource: {
+	        transport: {
+	        	read: {
+	        		url:site_url+'kendo_crud/form_sample/autocomplete_filter_by_before/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+	                dataType:'json' //'jsonp'为跨域请求json数据(url为跨域链接)
+	        	}
+	        }
+       	},
+        separator: ", ",
+        height: 200, 
+        minLength: 1
+	}).data('kendoDropDownList');
+})
+</script>

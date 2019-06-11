@@ -1,0 +1,102 @@
+<div id='grid'></div>
+<script type="text/x-kendo-template" id="template">
+    <div class="toolbar" style="float: right;">
+        <label class="category-label" for="category">作家:</label>
+        <input type="search" id="category" style="width: 230px"></input>
+    </div>
+</script>
+<script type="text/javascript">
+$(function(){
+    var dataSource = new kendo.data.DataSource({
+        transport: {
+	        read: {
+	            url:site_url+'kendo_crud/search_books_by_drop_list/',
+	            dataType:'json'
+			},
+            parameterMap: function(options, operation) {
+                if(options.filter){
+                    return {
+                            'page': options.page,
+                            'pageSize': options.pageSize,
+                            'filters':kendo.stringify(options.filter.filters)
+                           }
+               	 }else{
+                    return {
+                            'page': options.page,
+                            'pageSize': options.pageSize    
+                           }
+				}
+            }
+        },
+        // batch: true,   //数据批量保存，更改的数据以list的形式保存,default=false
+        pageSize: 10,
+        serverFiltering: true,
+        serverPaging: true, 
+        schema: {
+            data:function(res){return res.data},
+            total:function(res){return res.total},
+        }
+    });
+    var grid=$("#grid").kendoGrid({
+        dataSource: dataSource,
+        resizable: true,
+        pageable: true,
+        sortable: true,
+        // filterable: true,
+        width:1400,
+        toolbar: kendo.template($("#template").html()),
+        dataBound: function(){
+        	var tbody = $("#grid tbody").html();
+        	if(!tbody){
+	        	$($("#grid tbody").get(0)).html('<tr><td colspan="9" style="text-align: center">没有数据</td></tr>');	
+        	}
+        },                        
+        // scrollable: true,
+        // height: 400,
+        columns: [
+            { 
+                field: "title",
+                title:"书名",
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            },
+            // { field: "author", title:"作者", width: 100 },
+            { 
+                field: "publication_date", 
+                title:"出版日期",
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"} 
+            },
+            { 
+                field: "price", 
+                title: "价格" ,
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            }
+        ]
+	});
+
+    var dropDown = grid.find("#category").kendoDropDownList({
+        dataSource: {
+            transport: {
+                read:  {
+                        url:site_url+"kendo_crud/headend_pagation/",
+                        dataType:'json'
+				}
+			},
+        },
+        dataTextField: "english_name",
+        dataValueField: "id",
+        autoBind: false,
+        optionLabel: "All",
+        change: function() {
+            var value = this.value();
+            if (value) {
+                grid.data("kendoGrid").dataSource.filter({ field: "id", operator: "eq", value: value});
+            } else {
+                grid.data("kendoGrid").dataSource.filter({});
+            }
+        }
+    });
+});
+</script>

@@ -1,0 +1,181 @@
+# -*- coding: utf-8 -*-
+<%inherit file="celery_base.html" />
+<%block name="cur_pos">
+	<li>&gt;</li><li class="active">定时任务</li>
+</%block>
+<%block name='celery_content'>
+	<div class="row-fluid mb20">
+		<div class="col-md-2" id="offset_holder"></div>
+		<!-- 	任务参数填写	start -->
+	    <div id="params_div" class="col-md-12 form-columns-2">
+			<!-- 执行组件 start -->
+	    	<section class="panel panel-default" id="time_task_param">
+				<div class="panel-heading">
+					<strong>发信息（发送给自己）</strong>
+				</div>
+				<div class="panel-body  form-horizontal" id="send_msg">
+					<div class="form-group">
+						<label for="" class="col-md-3 control-label">消息：<span class="" style="color:red">*</span></label>
+						<div class="col-md-9">
+							<textarea name="message_text" id="message_text" class="form-control" useage="1" required="required"></textarea>
+						</div>
+					</div>
+					<div class="form-group" id="do_schedule_div">
+						<label for="" class="col-md-3 control-label">定时执行：</label>
+						<div class="col-md-9">
+							<!-- <input type='checkbox' name="do_schedule" id="do_schedule" style='margin-top:10px'/> -->
+							<div class="onoffswitch" style="margin-top: 3px;">
+								<input type="checkbox" class="checkboxes onoffswitch-checkbox" name="do_schedule" id="do_schedule" style="display: none">
+								<label for="do_schedule" class="onoffswitch-label">
+								<div class="onoffswitch-inner">
+								</div>
+								<div class="onoffswitch-switch">
+								</div>
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="form-group" id="schedule_div" style="display: none">
+						<label for="" class="col-md-3 col-xs-3 control-label">定时时间：<span class="" style="color:red;display: none" id="star">*</span></label>
+						<div class="col-md-9">
+							<input type="text" class='datetime-picker'  id="schedule_time"  value="" /> (请填写北京时间)
+						</div>
+					</div>
+				</div>
+			</section>
+			<div class="t_c" style="margin-bottom: 20px">
+			   	<button id="save_params" type="button" class="btn btn-box btn-primary" onclick="excute_task(this)" >提交任务</button>
+				<button type="reset" class="btn btn-box" onclick="window.location.reload();">取消</button>
+			</div>
+	    </div>
+	    <!-- 	任务参数填写	end -->
+        <!-- TODO 执行流程图 start -->
+	    <div id="countdown_div" class="col-md-6 form-columns-2" style="height:100%;display: none;">
+				<%include file="timing_task_countdown.part" />
+	    </div>
+        <!-- 执行流程图 end -->
+	</div>
+</%block>
+<script type="text/javascript">
+	function poll_notice(record_id){
+		var poll_url = site_url + "test_celery/poll_task/";
+		$.get(poll_url, {'record_id': record_id},function(data){
+			if(data.result == 0){
+				//失败
+				console.log(data.message);
+			}else if(data.result == 1){
+				//成功
+				new PNotify({
+			        title: data.title,
+			        text: data.content,
+			        icon: 'glyphicon glyphicon-envelope',
+			        animation: "fade",
+			        // animate_speed: "show",
+			        addclass: 'pnotice_center',
+			    	buttons:{sticker:false},
+			    	hide: false
+				});
+			}else{//轮询
+				window.setTimeout(function(){
+					poll_notice(record_id);
+				}, 1*1000);
+			}
+		}, 'json');
+	}
+	$(function(){
+		// $('#do_schedule').onoff();
+		// 定时时间时间
+		$("#do_schedule_div").on("click", "#do_schedule", function(){
+			var checked = $(this).is(":checked");
+			if (checked) {
+				$("#schedule_time").attr('required', 'required');
+				$("#schedule_div").css('display', '');
+				$("#star").css('display', '');
+				schedule_time.enable(true);
+			} else {
+				$("#schedule_time").removeAttr('required');
+				$("#schedule_div").css('display', 'none');
+				$('#star').css('display', 'none');
+				$('#schedule_time').val('');
+				schedule_time.enable(false);
+			}
+		});
+		var schedule_time = $("#schedule_time").kendoDateTimePicker({
+			// culture : "zh-CN",
+			min: new Date(),
+			format : "yyyy-MM-dd HH:mm",
+			interval : 30
+		}).data("kendoDateTimePicker");
+	});
+/*
+ * 验证参数
+ */
+function validate(){
+	var flag = true;
+	//==== 验证参数，required=required====
+	$("select[required='required'],input[required='required'], textarea[required='required']", "#time_task_param").each(function(){
+		if($(this).val() == ''){
+			// 验证参数的名称
+			var name = $(this).parents('div').prev('label').text();
+			var validate_str = name+ "不能为空";
+			show_msg(validate_str, 4)
+			$(this).focus();
+			flag = false
+			return false;
+		}
+	});
+	return flag;
+}
+/*
+ * 组装参数
+ */
+function get_params(){
+	var params = {},
+		_key = 'send_msg',
+		_value = {};
+	params[_key] = {"message": $("#message_text").val()}
+	params['is_schedule'] = {"do_schedule": $('#do_schedule').is(":checked")?1:0,
+							 "schedule_time": $('#schedule_time').val()
+							 }
+	return params;
+}
+function show_countdown(schedule_timestamp){
+	$("#offset_holder").remove();//offset只是用于占位，以使参数列表div居中
+	$("#params_div").removeClass('col-md-12').addClass('col-md-6');
+	// 定时时间
+	var schedule_time = $('#schedule_time').val();
+	// 设置定时时间
+	countdown(schedule_timestamp);
+	$("#countdown_div").css('display', '');
+}
+/*
+ * 执行任务
+ */
+function excute_task(obj){
+	$(obj).attr("disabled", true).html("<i class='icon-loading'></i>正在提交");
+	if(validate()){
+		params = get_params();
+		var url = site_url + 'test_celery/excute_task/';
+		$.post(url,{
+			'params':  JSON.stringify(params)
+		}, function(data){
+			if(data.result){
+				show_msg("任务创建成功，正在后台执行", 2);
+				$(obj).attr("disabled", true).html("提交成功");
+				var schedule_timestamp = data.message;
+				if (schedule_timestamp){
+    				// 显示定时器
+    				show_countdown(schedule_timestamp);
+				}
+				poll_notice(data.record_id);
+			}else{
+				alert_msg(data.message, 4);
+				$(obj).attr("disabled", false).html("提交任务");
+			}
+		}, 'json');
+	}else{
+		$(obj).attr("disabled", false).html("提交任务");
+	}
+}
+</script>
+

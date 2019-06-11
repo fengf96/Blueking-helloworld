@@ -1,0 +1,72 @@
+ <table id="netflixTable">
+    <thead>
+        <tr>
+            <th>
+                英文名
+            </th>
+            <th>
+                中文名
+            </th>
+            <th>
+                所在城市
+            </th>
+            <th>
+                出生日期
+            </th>
+             <th>
+                年龄
+            </th>
+            <th>
+                邮箱
+            </th>
+            <th>
+                电话
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<script id="rowTemplate" type="text/x-kendo-tmpl">
+    <tr>
+        <td>
+            #= english_name #
+        </td>
+        <td>
+            #=  chinese_name #
+        </td>
+        <td>
+            #= city #
+        </td>
+        <td>
+            #= birthday #
+        </td>
+         <td>
+            #= age #
+        </td>
+        <td>
+            #= email #
+        </td>
+        <td>
+            #= tel #
+        </td>
+    </tr>
+</script>
+<script type="text/javascript">
+$(function(){
+    var url=site_url+"kendo_crud/headend_pagation/";   
+    var dataSource = new kendo.data.DataSource({
+        transport:{  
+            read:{
+                url:url,
+                dataType:'json'
+            },
+        }
+    });
+    $("#netflixTable").kendoGrid({
+        dataSource:dataSource,
+        rowTemplate: kendo.template($("#rowTemplate").html()),
+        height:440
+    });
+})
+</script>

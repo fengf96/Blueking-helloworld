@@ -1,0 +1,328 @@
+<div class="pt20 pb20 container-fluid" style="border: 1px solid #DADADA;margin-bottom: 15px;">
+<form method="get" class="pg10 form-inline form-horizontal" id="form" name="form" action="">
+    <div class="row">
+        <div class="col-xs-4">
+            <div class="pb10">
+                <label for="name" class="">姓名：</label>
+                <input type="text" id="name" name="name" style="width:150px"/>
+            </div>
+            <div>
+                <label for="city" class="">城市：</label>
+                <input type="text" id="city" name="city" style="width:150px" />
+            </div>
+        </div>
+        <div class="col-xs-4">
+             <div class="pb10">
+                <label for="start_age" class="">年龄(起始)：</label>
+                <input type="number" id="start_age" name="start_age" style="width:150px"/>
+            </div>
+            <div>
+                <label for="end_age" class="">年龄(结束)：</label>
+                <input type="number" id="end_age" name="end_age" style="width:150px"/>
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="pb10">
+                <label for="start_birthday" class="">生日(起始)：</label>
+                <input type="text" id="start_birthday" name="start_birthday" style="width:150px"/>
+            </div>
+            <div>
+                <label for="end_birthday" class="">生日(结束)：</label>
+                <input type="text" id="end_birthday" name="end_birthday" style="width:150px"/>
+            </div>
+        </div>
+    </div>
+    <div class="row mt10">
+    	<div class="col-xs-4">
+            <div>
+                <label for="tel" class="">电话：</label>
+                <input type="text" id="tel" name="tel" style="width:150px"/>
+            </div>
+        </div>
+        <div class="col-xs-8">
+	        <div id="form_submit" class="f_r" style="margin-right: 50px;">
+	            <button type="submit" id="submit" class="k-button k-primary">查询</button>
+	            <button type="reset" id="reset" class="k-button">重置</button>
+	         </div>
+	     </div>
+    </div>
+</form>
+</div>
+<div class="mt20" id="grid"></div>
+<!--  javascript-->
+<script type="text/javascript">
+var url=site_url+'kendo_crud/batch_edit/';
+var dataSource = new kendo.data.DataSource({
+    transport: {
+        read:
+        {
+            url:site_url+'kendo_crud/form_search/',
+            dataType:'json',
+            type:'GET',
+        },
+        update:{
+            url:url,
+            dataType:'json',
+            type:'POST'
+
+		},
+        destroy: {
+            url:url,
+            dataType:'json',
+            type:'POST'
+		},
+        create:  {
+            url:url,
+            dataType:'json',
+            type:'POST'
+		},
+        parameterMap: function(options, operation) {
+            if(operation=="read"){
+                return {
+                     'page': options.page,
+                     'pageSize': options.pageSize,
+                     // 额外查询
+                     'english_name':$('#name').val(),
+                     'email':$('#email').val(),
+                     'city':$("#city").val(),
+                     'tel':$("#tel").val(),
+                     'start_birthday':$("#start_birthday").val(),
+                     'end_birthday':$("#end_birthday").val(),
+                     'start_age':$('#start_age').val(),
+                     'end_age':$('#end_age').val()
+                }
+            }
+            if (operation !== "read"&&options.models) {
+            	for(k=0;k<options.models.length;k++){
+            		birthday_str=date2str(options.models[k].birthday,'yyyy-MM-dd hh:mm:ss');
+                 	options.models[k].birthday=birthday_str;
+            	}
+                return {'operation':operation,
+                        'models': kendo.stringify(options.models)
+				};
+            }       
+        }
+	},
+    // autoSync:true, //自动同步到后台，自动提交
+    batch: true,   //数据批量保存，更改的数据以list的形式保存
+    pageSize: 12,
+    serverPaging: true,
+    schema: {
+        model: person_model,
+        data:function(res){
+            if(res.result&&res.data){
+                return res.data.data_list;
+            }else{
+                alert(res.message);
+            }
+        },
+        total:function(res){return res.data.total}
+    }
+});
+//表格绑定
+var grid=$("#grid").kendoGrid({
+    dataSource: dataSource,
+    resizable: true,
+    pageable: true,
+    sortable: true,
+    columnMenu: true,
+    filterable: true,
+    width:1400,
+    dataBound: function(){
+    	var tbody = $("#grid tbody").html();
+    	if(!tbody){
+    		$("#grid tbody").html('<tr><td colspan="9" style="text-align: center">没有数据</td></tr>');	
+		}
+	},
+    toolbar: [
+    	{ name:"create",text:"新增记录"},
+		{ name:"save",text:'保存修改'},
+		{ name:"cancel",text:'取消'}
+	],
+    columns: [
+        {
+            field: "english_name",
+            title:'英文名',
+            filterable:true,
+            headerAttributes: {style: "text-align: center"},
+            attributes:{style: "text-align: center"}
+        },
+        {
+            field: "chinese_name",
+            title:'中文名',
+            headerAttributes: {style: "text-align: center"},
+            attributes:{style: "text-align: center"}
+        }, 
+        {
+           
+            field: "city",
+            title:'所在城市',
+            headerAttributes: {style: "text-align: center"},
+            attributes:{style: "text-align: center"}
+        }, 
+        {
+            field: "birthday",
+            title:'出生日期',
+            //format: "{0:yyyy-MM-dd}",
+            template: '#= kendo.toString(birthday,"yyyy-MM-dd") #',
+            headerAttributes: {style: "text-align: center"},
+            attributes:{style: "text-align: center"}
+        },
+        {
+            field: "age",
+            title:'年龄',
+            headerAttributes: {style: "text-align: center"},
+            attributes:{style: "text-align: center"}
+        },
+        {
+            field: "email",
+            title: "邮箱",
+            headerAttributes: {style: "text-align: center"},
+            attributes:{style: "text-align: center"}
+        },
+        {
+            field: "tel",
+            title:'电话',
+            headerAttributes: {style: "text-align: center"},
+            attributes:{style: "text-align: center"}
+        } 
+    ],
+    editable: true
+});
+
+//点击
+$('#submit').click(function(){
+	dataSource.page(1);
+	return false;
+});
+
+$(function(){
+	$("#name").kendoAutoComplete({
+        dataTextField: 'english_name', 
+        dataSource: {
+		    transport: {
+		        read: {
+		            url:site_url+'kendo_crud/form_search/autocomplete/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+		            dataType:'json' //'jsonp'为跨域请求json数据(url为跨域链接)
+		        }
+		    }
+       	},
+        filter: "startswith", 
+        placeholder: "作家姓名",
+        separator: ";",
+        height: 500, 
+        minLength: 1, 
+	});
+   
+	//城市
+	$("#city").kendoAutoComplete({
+        dataTextField: 'city', 
+        dataSource: {
+		    transport: {
+		        read: {
+		            url:site_url+'kendo_crud/form_search/autocomplete/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+		            dataType:'json' //'jsonp'为跨域请求json数据(url为跨域链接)
+		        }
+		    }
+       	},
+        filter: "startswith", 
+        placeholder: "所在城市",
+        separator: ";",
+        height: 500, 
+        minLength: 1
+	});
+
+	//邮箱
+	$("#email").kendoComboBox({
+        dataTextField: "email", //可作为模版变量值
+        dataValueField: "email",     //可作为模版变量值，默认为""
+        dataSource: {
+            transport: {
+                read: {
+                    url:site_url+'kendo_crud/form_search/autocomplete/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+                    dataType:'json'
+                }
+            }
+		},
+        filter: "contains",
+        placeholder: "电子邮箱"
+	});
+	        
+	//电话
+	$("#tel").kendoComboBox({
+        dataTextField: "tel",
+        dataValueField: "tel",
+        dataSource: {
+            transport: {
+                read: {
+                    url:site_url+'kendo_crud/form_search/autocomplete/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+                    dataType:'json'
+                }
+            }
+		},
+        filter: "contains",
+        placeholder: "电话号码"
+	});
+        
+	//出生日期时间段
+	function start_birthday_change() {
+        var startDate = start_birthday.value(); 
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate() + 1);
+            end_birthday.min(startDate);
+        }
+	}
+	
+	function end_birthday_change() {
+	    var endDate = end_birthday.value();
+	    if (endDate) {
+	        endDate = new Date(endDate);
+	        endDate.setDate(endDate.getDate() - 1);
+	        start_birthday.max(endDate);//设置starttime的最大值
+	    }
+	}
+	var start_birthday = $("#start_birthday").kendoDatePicker({
+        change: start_birthday_change,
+        start: "month", 
+        depth: "month", 
+        format: "yyyy-MM-dd", //定义输入框内的时间格式（可以自定义yyyy/MM/dd、yyyy-MM-dd）默认yyyy/MM/dd
+        footer: "Today - #=kendo.toString(data, 'd') #"
+	}).data("kendoDatePicker");
+	    
+	var end_birthday = $("#end_birthday").kendoDatePicker({
+        change: end_birthday_change,
+        start: "month", 
+        depth: "month", 
+        format: "yyyy-MM-dd", //定义输入框内的时间格式（可以自定义yyyy/MM/dd、yyyy-MM-dd）默认yyyy/MM/dd
+        footer: "Today - #=kendo.toString(data, 'd') #"
+    }).data("kendoDatePicker");
+	
+	//年领段
+	function start_age_change(){
+	    var start = start_age.value();
+	    end_age.min(start);
+	}
+	
+	
+	function end_age_change(){
+	    var end = end_age.value();
+	    start_age.max(end);
+	}
+	
+	var start_age = $("#start_age").kendoNumericTextBox({
+	    change: start_age_change,
+	    format: "",
+	    decimals: 0
+	}).data('kendoNumericTextBox');
+	
+	var end_age = $("#end_age").kendoNumericTextBox({
+	    change: end_age_change,
+	    format: "",
+	    decimals: 0
+	}).data('kendoNumericTextBox');
+	
+	$('#submit').click();
+})
+
+</script>

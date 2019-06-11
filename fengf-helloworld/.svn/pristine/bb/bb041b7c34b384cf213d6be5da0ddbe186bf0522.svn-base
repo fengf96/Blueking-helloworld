@@ -1,0 +1,28 @@
+<div id="countdown_id" class="t_c">
+	<!-- 倒计时	 -->
+	<h1 >倒计时</h1>
+	<div class="line"></div>
+	<div id="countdown" style="font-size: 35px;"></div>
+	<p id="note" style="margin-top: 10px"></p>
+</div>
+ <script>
+	 /*
+	  * 倒计时
+	  */
+ 	function countdown(target_time){
+ 		//var target_time = (new Date()).getTime() + 10*24*60*60*1000;
+ 		var target_time = target_time*1000;
+ 		var note = $('#note');
+	    $('#countdown').countdown({
+	        timestamp	: target_time,
+	        callback	: function(days, hours, minutes, seconds){
+	            var message = "";
+	            message += days + " 天 " + ", ";
+	            message += hours + " 小时 "  + ", ";
+	            message += minutes + " 分 "  + ", ";
+	            message += seconds + " 秒 " + " <br />";
+	            note.html(message);
+	        }
+	    });
+ 	}
+ </script>

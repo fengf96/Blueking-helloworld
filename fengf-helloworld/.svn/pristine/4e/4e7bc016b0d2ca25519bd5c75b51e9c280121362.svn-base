@@ -1,0 +1,83 @@
+<div id="grid"></div>
+
+<script type="text/javascript">
+$(function(){
+    var url=site_url+"kendo_crud/headend_pagation/";   
+    var dataSource = new kendo.data.DataSource({
+        transport:{  
+            read:{
+                    url:url,
+                    dataType:'json'
+			},
+        },
+        pageSize: 10,
+	});
+                        
+    var grid=$("#grid").kendoGrid({
+		dataSource: dataSource,
+        resizable: true,
+        pageable: true,
+        sortable: true,
+        columnMenu: true,
+        filterable: true,
+        width:1400,
+        dataBound: function(){
+        	var tbody = $("#grid tbody").html();
+        	if(!tbody){
+	        	$($("#grid tbody").get(0)).html('<tr><td colspan="9" style="text-align: center">没有数据</td></tr>');	
+        	}
+        },                        
+        // height: 350,
+        columns: [
+            {
+                field: "english_name",
+                title:'英文名',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            },
+            {
+                field: "chinese_name",
+                title:'中文名',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            } , 
+            {
+               
+                field: "city",
+                title:'所在城市',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+                
+            } , 
+            {
+                field: "birthday",
+                title:'出生日期',
+                format: "{0:yyyy-MM-dd HH:mm:ss}",
+                template: '#= kendo.toString(birthday,"yyyy-MM-dd") #',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            } ,
+            {
+                field: "age",
+                title:'年龄',
+                width:70,
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            } ,
+            {
+                field: "email",
+                title: "邮箱",
+                width:200,
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            },
+            {
+                field: "tel",
+                title:'电话',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            } 
+        ]
+	});  
+});
+</script>

@@ -1,0 +1,93 @@
+<div id="grid"></div>
+<script type="text/javascript">
+$(function(){
+    var url=site_url+"kendo_crud/headend_pagation/";   
+    var dataSource = new kendo.data.DataSource({
+		transport:{  
+		    read:
+		        {
+		            url:url,
+		            dataType:'json'
+		        }
+		},
+		pageSize: 10,
+		//groups data by city field,default is client-side group
+		//aggregates the group data
+        group: [{
+			field: "city", aggregates: [
+				{ field: "english_name", aggregate: "count" },
+				{ field: "chinese_name", aggregate: "sum"},
+				{ field: "city", aggregate: "count" },
+				{ field: "age", aggregate: "average" }
+			],
+			dir:"desc"
+        }],
+        //aggregate data by the field,example:english_name,age.default is client-side aggregate
+        aggregate: [
+			{ field: "english_name", aggregate: "count" },
+          	{ field: "age", aggregate: "average" },
+          	{ field: "age", aggregate: "min" },
+          	{ field: "age", aggregate: "max" }
+		],
+	});
+    //表格定义
+     var grid=$("#grid").kendoGrid({
+		dataSource: dataSource,
+        resizable: true,
+        pageable: true,
+        sortable: true,
+        width:1400,
+        dataBound: function(){//表格没有数据时初始化
+	    	var tbody = $("#grid tbody").html();
+	    	if(!tbody){
+	        	$($("#grid tbody").get(0)).html('<tr><td colspan="9" style="text-align: center">没有数据</td></tr>');	
+	    	}
+        },                        
+        // height: 480,
+        columns: [
+	        {
+	            field: "english_name",
+	            title:'英文名',
+	            filterable:true,
+	            groupFooterTemplate:"小计: #=count#",
+	            footerTemplate:"总计: #=count#",
+	            headerAttributes: {style: "text-align: center"},
+	            attributes:{style: "text-align: center"}
+	        },
+	        {
+	            field: "chinese_name",
+	            title:'中文名',
+	            headerAttributes: {style: "text-align: center"},
+	            attributes:{style: "text-align: center"}
+	        } , 
+	        {
+	            field: "city",
+	            title:'所在城市',
+	            headerAttributes: {style: "text-align: center"},
+	            attributes:{style: "text-align: center"}
+	           
+	        } ,
+	        {
+	            field: "age",
+	            title:'年龄',
+	            footerTemplate:"<div>average: #=average#</div><div>min:#=min#</div><div>max:#=max#</div>",
+	            groupFooterTemplate:"平均年龄:#=average#",
+	            headerAttributes: {style: "text-align: center"},
+	            attributes:{style: "text-align: center"}
+	        },
+	        {
+	            field: "email",
+	            title: "邮箱",
+	            headerAttributes: {style: "text-align: center"},
+	            attributes:{style: "text-align: center"}
+	        },
+	        {
+	            field: "tel",
+	            title:'电话',
+	            headerAttributes: {style: "text-align: center"},
+	            attributes:{style: "text-align: center"}
+	        } 
+        ]
+    });
+})
+</script>

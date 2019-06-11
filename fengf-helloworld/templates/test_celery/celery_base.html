@@ -1,0 +1,77 @@
+<%inherit file="/base.html"/>
+<%block name="head">
+	<title>后台任务样例</title>
+	${parent.head()}
+	<link rel="stylesheet" href="${STATIC_URL}css/hooraylibs.css">
+	<link href="${REMOTE_STATIC_URL}v3/assets/pnotify-2.0/css/pnotify.core.css" rel="stylesheet">
+	<!-- 倒计时插件	 -->
+	<link href="${STATIC_URL}countdown/jquery.countdown.css"rel="stylesheet">
+	<!-- 开关插件 -->
+	<link href="${STATIC_URL}css/jquery.onoff.css"rel="stylesheet">
+	<style>
+		.pnotice_center{
+		    width: 350px; /*必须设置宽度*/
+		    position: fixed;
+		    left: 0;
+		    right: 0;
+		    top: 150px;
+		    margin: auto;
+		}
+	</style>
+</%block>
+<%block name="content">
+	<div class="structure-top" style="height:40px;">
+		<div class="breadcrumb  ">
+				<i class="location">当前位置：</i>
+				<ul>
+					<li><a id="cur_biz" href="${SITE_URL}test_celery/">后台任务样例</a></li>
+					<%block name="cur_pos">
+					</%block>
+				</ul>
+			</div>
+		<%block name="back_btn">
+		</%block>
+	</div>
+	<div class="structure-main" style="clear: both">
+	    <div class="structure-left" style="float:left; width:11%;">
+	    	<div class="sidebar_wrap">
+			    <ul id="menu"  style="height: 600px">
+                    <%
+                        active_timing = active_periodic = active_chain = ''
+                        if APP_PATH == SITE_URL + "test_celery/timing_task/":
+                            active_timing = 'k-state-selected k-state-focused'
+                        elif APP_PATH.startswith(SITE_URL + "test_celery/periodic_task"):
+                            active_periodic = 'k-state-selected k-state-focused'
+                    %>
+                	<li class="${active_timing}"><a href="${SITE_URL}test_celery/timing_task/">定时任务</a></li>
+                	<li class="${active_periodic}"><a href="${SITE_URL}test_celery/periodic_task/">周期任务</a></li>
+			    </ul>
+	    	</div>
+	    </div>
+	    <div class="structure-right" style="float:right; width:89%;">
+    		<%block name="celery_content">
+			</%block>
+	    </div>
+	</div>
+</%block>
+<script src="${REMOTE_STATIC_URL}v3/assets/pnotify-2.0/js/pnotify.core.min.js"></script>
+<script src="${REMOTE_STATIC_URL}v3/assets/pnotify-2.0/js/pnotify.buttons.js"></script>
+<script src="${STATIC_URL}countdown/jquery.countdown.js"></script>
+<script src="${STATIC_URL}js/jquery.onoff.min.js"></script>
+<script src="${STATIC_URL}js/hooraylibs.js"></script>
+<script>
+$(document).ready(function () {
+
+    var initMenu = function () {
+        $("#menu").kendoMenu({
+            orientation: 'vertical'
+        })
+        .css({
+            width: "120px"
+        });
+    };
+
+    initMenu();
+});
+</script>
+${next.body()}

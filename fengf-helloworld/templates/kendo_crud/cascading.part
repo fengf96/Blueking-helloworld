@@ -1,0 +1,213 @@
+<!--   级联combobox-->
+<div class="row">
+    <div class="col-xs-5" style="margin-left: 50px;margin-top: 20px;">
+    	<div class="the-notes success">
+			<div class="t_b ml5">combobox</div>
+			<div id="combobox_cascading" class="  ml5">
+			    <p>
+			        <label for="box_name">第一级（作家姓名）</label>
+			        <input id="box_name"/>
+			    </p>
+			    <p>
+			        <label for="box_book">第二级（书籍名称）</label>
+			        <input id="box_book" disabled="disabled" />
+			     </p>
+			</div>
+		</div>
+		<!--   级联dropdownlist-->
+		<div class="the-notes info">
+			<div class="t_b ml5">dropdownlist</div>
+			<div id="dropdownlist" class="  ml5">
+			    <p>
+			        <label for="drop_name">第一级（作家姓名）</label>
+			        <input id="drop_name"/>
+			    </p>
+			    <p>
+			        <label for="drop_book">第二级（书籍名称）</label>
+			        <input id="drop_book" disabled="disabled" />
+			    </p>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-5" style="margin-left: 50px;margin-top: 20px;">
+		<!--DatePicker 级联  -->
+		<div class="the-notes success">
+			<div class="t_b ml5">DatePicker</div>
+			<div class="  ml5" id="datepicker">
+				<p>
+				    <label for="start_date">起始日期:</label>
+				    <input id="start_date" value="" />
+				</p>
+				<p>
+				    <label for="end_date">结束日期:</label>
+				    <input id="end_date" value=""/>
+				</p>
+			</div>
+		</div>
+		<!--datetimepicker 级联  -->
+		<div class="the-notes info">
+			<div class="t_b ml5">DateTimePicker</div>
+			<div class="  ml5" id="datetimepicker">
+				<p>
+				    <label for="start_datetime">起始日期:</label>
+				    <input id="start_datetime" value="" />
+				</p>
+				<p>
+				    <label for="end_datetime">结束日期:</label>
+				    <input id="end_datetime" value=""/>
+				</p>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+$(function() {
+	//combobox 级联
+	//第一级
+    $("#box_name").kendoComboBox({
+    	autoBind: false,
+        placeholder: "请选择...",
+        dataTextField: "english_name",
+        dataValueField: "english_name", //combobox 提交的值对应的键
+        dataSource: {
+	        transport: {
+	        	read: {
+	        		url:site_url+'kendo_crud/form_sample/autocomplete_filter_by_before/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+	                dataType:'json'
+	        	}
+	        }
+	   	},
+	   	filter: "startswith"
+    });
+    //第二级
+    var box_book = $("#box_book").kendoComboBox({
+        autoBind: false,
+        cascadeFrom: "box_name", //设定级联的combox
+        placeholder: "请选择...",
+        dataTextField: "title",
+        dataValueField: "title",
+        dataSource: {
+        	serverFiltering: true,
+	        transport: {
+	        	read: {
+	        		url:site_url+'kendo_crud/form_sample/combobox_cascading_filter/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+	                dataType:'json'
+	        	}
+	        }
+	    },
+        filter: "startswith"
+    }).data("kendoComboBox");
+    
+    //绑定change事件（级联二级没有数据时数据存为''）
+    box_book.bind("change", function(e) {
+    	if(box_book.value() == "请选择..."){
+    		box_book.value('')
+    	}
+	});
+    
+    //DropDownList 级联
+	//第一级
+    $("#drop_name").kendoDropDownList({
+    	autoBind: false,
+        dataTextField: "english_name",
+        dataValueField: "english_name",
+        optionLabel: '请选择...',
+        dataSource: {
+	        transport: {
+	        	read: {
+	        		url:site_url+'kendo_crud/form_sample/autocomplete_filter_by_before/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+	                dataType:'json'
+	        	}
+	        }
+	    }
+    });
+    //第二级
+    var drop_book = $("#drop_book").kendoDropDownList({
+        cascadeFrom: "drop_name", //设定级联的combox
+        dataTextField: "title",
+        dataValueField: "title",
+        dataSource: {
+        	serverFiltering: true,
+	        transport: {
+	        	read: {
+	        		url:site_url+'kendo_crud/form_sample/dropdownlist_cascading_filter/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+	                dataType:'json'
+	        	}
+	        }
+	   	}
+    }).data("kendoDropDownList");
+    
+    //DatePicker级联
+    function startChange() {
+        var startDate = start_date.value();     //获取kendoDatePicker对象的值（开始时间值）
+        if (startDate) {
+            startDate = new Date(startDate); //转为中国标准时间
+            startDate.setDate(startDate.getDate() + 1);//获取起始时间的日期加1
+            end_date.min(startDate);//设置endtime的最小值
+        }
+   	}
+
+    function endChange() {
+        var endDate = end_date.value();
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate() - 1);
+            start_date.max(endDate);//设置starttime的最大值
+        }
+    }
+
+    var start_date = $("#start_date").kendoDatePicker({
+    	value: new Date(2012, 11, 5), //设置初值2012-01-05
+        change: startChange,
+        format: "yyyy-MM-dd"
+    }).data("kendoDatePicker");
+
+    var end_date = $("#end_date").kendoDatePicker({
+    	value: new Date(2013, 0, 5), //设置初值2013-01-05
+        change: endChange,
+        format: "yyyy-MM-dd"
+    }).data("kendoDatePicker");
+    //初始化最值
+    start_date.max(end_date.value());
+    end_date.min(start_date.value());
+    
+    
+    //DateTimePicker级联
+    function startChange() {
+        var startDate = start_datetime.value(); //获取起始时间
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate());
+            end_datetime.min(startDate);
+        }
+    }
+
+    function endChange() {
+        var endDate = end_datetime.value();//获取截止时间
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate());
+            start_datetime.max(endDate);
+        }
+    }
+
+    var start_datetime = $("#start_datetime").kendoDateTimePicker({
+    	value: new Date(2012, 11, 1),
+        change: startChange,
+        format: "yyyy-MM-dd HH:mm",
+        timeFormat: "HH:mm",
+        parseFormats: ["yyyy-MM-dd HH:mm:ss"],
+        interval: 15  //定义时间步长
+    }).data("kendoDateTimePicker");
+
+    var end_datetime = $("#end_datetime").kendoDateTimePicker({
+    	value: new Date(2013, 0, 9),
+        change: endChange,
+        format: "yyyy-MM-dd HH:mm",
+        timeFormat: "HH:mm",
+        interval: 15  //定义时间步长(分钟)
+    }).data("kendoDateTimePicker");
+    start_datetime.max(end_datetime.value());
+    end_datetime.min(start_datetime.value());
+});
+</script>

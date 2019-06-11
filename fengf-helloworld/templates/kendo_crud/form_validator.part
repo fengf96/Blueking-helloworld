@@ -1,0 +1,262 @@
+<div class="pg5 backcolor_common t_s16"><span class="ml10">Form表单验证</span></div>
+<div class="border pg0 pt10 border_top_no">
+	<!--表单start 验证时input	要加上name     -->
+	<form class="pg10" id="form" name="form" action="kendo_crud/form_sample/form_submit/">
+		<div class="row mt10" >
+			<div class="col-xs-6">
+				<!--autocomplete     type为text            	 -->
+				<div id="autocomplete_validator" class="">
+					<label for="search" class="percent_30 t_r">Autocomplete：</label>
+			        <input type="text" id="search" name="search" style="width:188px;" placeholder="Select City..." required validationMessage="请输入！"/>
+		            <!--错误信息提示 	位置与input的name相对应			         -->
+			        <span class="k-invalid-msg" data-for="search"></span> 
+			    </div>
+			</div>
+			<div class="col-xs-6">
+				<!-- 	普通的input	 {0}取的是name值   -->
+		        <div id="input_validator" class="">
+		        	<label for="input" class="percent_30 t_r">自定义验证：</label>
+		        	<input type="text" id="input" class="k-input k-textbox" name="input" style="width:188px;" placeholder="验证是否重名，例：Anne..." required data-required-msg="请输入！"/>
+		        	<!--错误信息提示 	位置与input的name相对应			         -->
+			        <span class="k-invalid-msg" data-for="input"></span> 
+		        </div>
+			</div>
+		</div>
+		<div class="row mt10" >
+			<div class="col-xs-6">
+				<!--email                      -->
+		        <div id="email_validator" class="">
+		        	<label for="email" class="percent_30 t_r">Email 验证：</label>
+		        	<input type="email" id="email" class="k-input k-textbox" name="email" style="width:188px;"  validationMessage="请输入！" data-email-msg="格式错误！"/>
+		        	<!--错误信息提示 	位置与input的name相对应			         -->
+			        <span class="k-invalid-msg" data-for="email"></span> 
+		        </div>
+			</div>
+			<div class="col-xs-6">
+				<!--phone Number 			     -->
+		        <div id="phone_validator" class="">
+		        	<label for="tel" class="percent_30 t_r">Tel 验证：</label>
+		            <!--自己添加正则表达式进行验证         type为text or tel            	 -->
+		        	<input type="tel" id="tel" class="k-input k-textbox" style="width:188px;" name="tel" pattern="\d{11}" placeholder="请输入11位数字..." required data-required-msg="请输入！"  validationMessage="格式错误！"/>
+		       		<!--错误信息提示 	位置与input的name相对应			         -->
+			        <span class="k-invalid-msg" data-for="tel"></span> 
+		        </div>
+			</div>
+		</div>
+		<div class="row mt10" >
+			<div class="col-xs-6">
+			    <div id="number_validator" class="">
+		        	<label for="amount" class="percent_30 t_r">最值验证：</label>
+		        	<input type="number" id="amount" name="amount" style="width:188px;" value="25", max="45" min="20" data-max-msg="请输入 20 到 45 之间的数字！" data-min-msg="请输入 20 到 45 之间的数字！"/>
+		        </div>
+		    </div>
+			<div class="col-xs-6">
+		        <!--date                      -->
+		       <div id="date_validator" class="">
+		        	<label for="birthday" class="percent_30 t_r">出生日期： </label>
+		        	<input type="text" id="birthday" name="birthday" style="width:188px;"/>
+		        </div>
+		      </div>
+		</div>     
+		<div class="row mt10" >
+			<div class="col-xs-6">
+				<!--datetime                      -->
+			       <div id="datetime_validator" class="">
+			        	<label for="datetime" class="percent_30 t_r">查询时间：</label>
+			        	<input type="text" id="datetime" name="datetime" style="width:188px;"/>
+			        </div>
+		    </div>
+			<div class="col-xs-6">
+		         <!--combobox                      -->
+		         <div id="combobox_validator" class="">
+		            	<label for="combobox" class="percent_30 t_r">Combobox：</label>
+		            	<input type="text" id="combobox" name="combobox" style="width:188px;" required validationMessage="请输入！"/>
+		            	<span class="k-invalid-msg" data-for="combobox"></span> 
+		          </div>
+		     </div>
+		</div>  
+		<div class="row mt10" >
+			<div class="col-xs-6">
+			    <div id="IP_validator" class="">
+					    <label for="IP" class="percent_30 t_r">单个Ip检测：</label>
+					    <input type="text" id="IP" name="IP" class="k-input k-textbox" style="width:188px;" pattern="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$" validationMessage="格式错误！" />
+					</div>
+		  	</div>
+			<div class="col-xs-6">
+		         <!--url                      -->
+		         <div id="url_validator" class="">
+		            	<label for="url" class="percent_30 t_r">URL 验证：</label>
+		            	<input type="url" id="url" class="k-input k-textbox" name="url" style="width:188px;" required validationMessage="请输入！"  data-url-msg="格式错误！" placeholder="http://www.example.com"/>
+		            	<span class="k-invalid-msg" data-for="url"></span> 
+		          </div>
+		      </div>
+		</div>             
+		<div class="row mt10" >
+			<div class="col-xs-6">
+				<!--radio                       -->
+		         <div id="radio_validator" class="">
+		            	<label for="radio" class="percent_30 t_r">单选： </label>
+		            	<label class="mr10">
+                              <input type="radio" id="radio" name="radio" value="radio1"/>单选1
+                         </label>
+                         <label class="mr10">
+		            	     <input type="radio" id="radio" name="radio" value="radio2" />单选2
+		            	 </label>
+		          </div>
+		    </div>
+			<div class="col-xs-6">
+		         <!--checkbox                  -->
+		         <div id="checkbox_validator" class="">
+		            	<label for="checkbox" class="percent_30 t_r">复选框：</label>
+		            	<label class="mr10 ml5"><input type="checkbox" id="checkbox1" name="checkbox1"/> 复选框1</label>
+		            	<label class="mr10"><input type="checkbox" id="checkbox2" name="checkbox2"/> 复选框2</label>
+		           </div>
+		      </div>
+		</div> 
+		<hr/>   
+		<!--表单提交 	                   -->  
+		<div class="t_c  clearfix" id="form_submit">
+                <button class="k-primary k-button" type="button" id="submit">提交信息</button>
+                <button type="button" class="k-button" id="reset_form">重填</button>
+                <span id="success-msg" class="ml20 t_error"></span>
+        </div>
+	</form>
+	<!--表单end 			     -->
+</div>
+<script>
+$(function(){
+	//autocomplete
+	var autocomplete = $("#search").kendoAutoComplete({
+    	dataTextField:'city', 
+    	template:'<a title="#=city#">#=city#</a>',//使用模版(变量为datasource的字典键值)
+    	dataSource: {
+	        transport: {
+	        	read: {
+	        		url:site_url+'kendo_crud/form_sample/autocomplete_filter_by_before/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+	                dataType:'json' //'jsonp'为跨域请求json数据(url为跨域链接)
+	        	}
+	        }
+       	},
+        filter: "startswith", //过滤方式，默认为startwidth（endwidth, contains）
+        separator: ", ",
+        height: 500, //下拉菜单高度，默认为200
+        ignoreCase: true, //搜索数据是否大小写敏感，false为敏感，默认是true
+        minLength: 1, //限制输入框输入多少字符后显示下拉
+   }).data('kendoAutoComplete');
+   
+   //combobox
+   var combobox = $("#combobox").kendoComboBox({
+        autoBind: false,
+        dataTextField: "city", //可作为模版变量值
+        dataValueField: "city",     //可作为模版变量值，默认为""
+        dataSource: {
+	        transport: {
+	        	read: {
+	        		url:site_url+'kendo_crud/form_sample/autocomplete_filter_by_before/', //url请求到的数据格式json编码后的[ { Name: "Item 1" }, { Name: "Item 2"} ]或列表
+	                dataType:'json'
+	        	}
+	        }
+		},
+        filter: "contains",
+        placeholder: "Select City...",
+        suggest: true,
+        //index: 3, //输入框内默认的数据index
+        delay: 500,
+        enable: true,
+	}).data('kendoComboBox');
+    
+    //kendoNumericTextBox
+    $("#amount").kendoNumericTextBox({
+    	format: ""
+    });
+        
+    //kendoDatePicker
+    var birthday = $("#birthday").kendoDatePicker({
+    	culture: "zh-CN",
+    	value: new Date(2012, 11, 5), //设置初值2012-01-05
+        format: "yyyy-MM-dd",
+        parseFormats: ["yyyy-MM-dd"],
+    }).data("kendoDatePicker");
+    //kendoDateTimePicker
+    var datetime = $("#datetime").kendoDateTimePicker({
+		value: new Date(2013, 0, 9),
+	    format: "yyyy-MM-dd HH:mm",
+	    parseFormats: ["yyyy-MM-dd HH:mm"],
+	    timeFormat: "HH:mm",
+	    interval: 15  //定义时间步长(分钟)
+    }).data("kendoDateTimePicker");
+    // 添加验证
+    var validator = $("#form").kendoValidator({
+       	//自定义规则
+		rules: {
+			custom: function(input){
+	        	//对指定input进行验证
+				if(input.is('[id=input]')){
+					var result = true;
+					$.ajax({
+						url: site_url+'kendo_crud/form_sample/name_is_exist/',
+						data: {'name': input.val()}, 
+						success: function(data){result = ! data.is_exist;},
+						async: false, //同步请求验证
+						dataType: 'json'
+					});
+					return result;
+				} else {
+	            	//其他的input验证通过
+	            	return true;
+	            }
+			}
+		},
+	    messages: {
+			custom: "该姓名已经存在！"
+	    }
+    }).data("kendoValidator");
+	
+	// 表单提交
+	$("#submit").click(function() {
+	    var radio = ''
+		if (validator.validate()) {
+			$('input[type=radio]').each(function(i){
+				if($(this).attr('checked')){
+					radio = $(this).val();
+				}
+			});
+            //ajax提交表单
+            var url = $("#form").attr('action');
+            var form_data = $.toJSON({
+               'city': autocomplete.value(),
+               'english_name': $("#input").val(),
+               'email': $("#email").val(),
+               'tel': $("#tel").val(),
+               'age': $("#amount").val(),
+               //'birthday': birthday.value(), //有时时区偏差，不是北京时间
+               'birthday': $("#birthday").val(), //这样获取到的uicode时间串和输入的一致
+               'checkbox1': $("#checkbox1").attr('checked') || '',
+               'checkbox2': $("#checkbox2").attr('checked') || '',
+               'combobox': combobox.value(),
+               'radio': radio,
+               'blog': $("#url").val(),
+               'ip': $("#IP").val(),
+               //'datetime': datetime.value() //有时时区偏差，不是北京时间
+               'datetime': $("#datetime").val() //这样获取到的uicode时间串和输入的一致
+            });
+            $.post(site_url+url, {'form_data': form_data}, function(data){
+	     		//表单保存成功后处理函数
+	     		if(data.result){
+	     			$('#success-msg').text("表单数据保存成功！");
+	     			$("#reset_form").click();
+	     		}
+	     	},'json');
+		}else{
+	    	//获取错误信息
+	    	var errors = validator.errors();
+		}
+	});
+	// 表单重置
+	$("#reset_form").click(function(){
+     	form.reset();
+     	birthday.value(new Date(2012, 11, 5));
+     	datetime.value(new Date(2013, 0, 9));
+    });
+});
+</script>

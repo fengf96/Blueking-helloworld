@@ -1,0 +1,167 @@
+# -*- coding: utf-8 -*-
+<%inherit file="celery_base.html" />
+<%block name="cur_pos">
+	<li>&gt;</li><li class="active"><a id="cur_biz" href="${SITE_URL}test_celery/periodic_task/">周期任务</a></li>
+	<li>&gt;</li>
+	<li>
+		任务执行记录
+	</li>
+</%block>
+<%block name="back_btn">
+	<a class="btn_back f_r mr15" href="${SITE_URL}test_celery/periodic_task/">返回</a>
+</%block>
+<%block name='celery_content'>
+	<div style="padding: 0 15px">
+		<input type="hidden" id="periodic_task_id" value="${task_id}"/>
+		<table id="task_grid" class="table table-bordered">
+         	<thead>
+                <tr class="alert-success t_c">
+                    <th>任务</th>
+                    <th>任务参数(args)</th>
+                    <th>任务参数(kwargs)</th>
+                    <th>Crontab 策略</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>${task}</td>
+                    <td>${task_args}</td>
+                    <td>${task_kwargs}</td>
+                    <td>${cron_schedule if cron_schedule else '--'}</td>
+                </tr>
+			</tbody>
+		</table>
+		<div id="record_grid"></div>
+	</div>
+</%block>
+<script>
+function get_task_records(){
+	var dataSource = '', grid = '';
+		dataSource = new kendo.data.DataSource({
+		transport:{
+			read:{
+					url: site_url+'test_celery/get_records/',
+					dataType: "json",
+					type: 'GET'
+				},
+			parameterMap: function(options,operation){
+				if(operation=="read"){
+					return {
+						'page': options.page,
+						'pageSize': options.pageSize,
+						'periodic_task_id':$("#periodic_task_id").val(),
+					};
+				}
+				if(operation != "read" && options.models) {
+					return {
+						'operation': operation,
+						'models': kendo.stringify(options.models)
+					};
+				}
+			}
+		},
+		pageSize: 15,
+		serverPaging: true,
+		change: function(){
+			//分页扩展
+			var info = $(".k-grid-pager .info");
+			if(!info.length){
+				info = $("<span class='info mr5' style='float:right;'/>").appendTo(".k-grid-pager");
+			}
+			info.text(kendo.format("显示 {0} - {1} , 共  {2} 条",(this.page()-1)*this.pageSize()+1,
+															   Math.min(this.page()*this.pageSize(),
+															   this.total()),
+															   this.total()));
+			$('.k-pager-info.k-label').remove();
+		},
+		requestStart: function(e) {
+	    	var tbody = $("#record_grid tbody").html();
+	    	if(!tbody){
+	        	$("#record_grid .k-grid-content table").css('margin-top','50px');
+	    	}else{
+	    		$("#record_grid .k-grid-content table").css('margin-top','0px');
+	    	}
+	    },
+	    requestEnd: function(e) {
+	    	$("#record_grid .k-grid-content table").css('margin-top','0px');
+	    },
+		schema: {
+			model: {
+                  id: "id",
+                  fields: {
+                     id:{type:"string",editable: false},
+                     excute_time:{type:"string",editable: false},
+                     excute_param:{type:"string",editable: false},
+                     excute_result:{type:"string",editable: false}
+                }
+            },
+			data: function(res){
+				if(res.result&&res.data){
+					return res.data.data_list;
+				}
+			},
+			total: function(res){
+				return res.data.total;
+			}
+		}
+	});
+	grid = $("#record_grid").kendoGrid({
+		dataSource: dataSource,
+		resizable: true,
+		pageable: true,
+        sortable: true,
+        width:1000,
+        columnMenu: true,
+		dataBound: function(){
+			        	var tbody = $("#record_grid tbody").html();
+			        	if(!tbody){
+			        	$("#record_grid tbody").html('<tr><td colspan="8" style="text-align: center">没有数据</td></tr>');
+		        	}
+		        },
+         toolbar: [
+	         { name: "show", template: '<label style="background-color: \\#7EA700;color:white;width:100px;padding: 5px;margin: 0 0 0 3px;">任务执行记录</label>'},
+	     ],
+		columns:[
+            {
+                field: "excute_time",
+                title:'执行时间',
+                headerAttributes: {
+                    style: "text-align: center"
+                    },
+                attributes:{
+                    style: "text-align: center"
+                    }
+            },
+            {
+                field: "excute_param",
+                title:'执行参数',
+                headerAttributes: {
+                    style: "text-align: center"
+                    },
+                attributes:{
+                    style: "text-align: center"
+                    }
+            },
+            {
+                field: "excute_result",
+                title:'执行结果',
+                headerAttributes: {
+                    style: "text-align: center"
+                    },
+                attributes:{
+                    style: "text-align: center"
+                    }
+            }
+		]
+	});
+}
+$(function(){
+	// 获取任务执行记录
+	get_task_records();
+	//60s刷新一次数据
+	setInterval(function(){
+		get_task_records();
+	}, 60*1000);
+});
+</script>
+

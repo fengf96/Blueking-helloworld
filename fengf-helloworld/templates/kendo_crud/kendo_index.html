@@ -1,0 +1,144 @@
+<%inherit file="/base.html" />
+<%block name='grid_content'>
+	<div class="container"  style="min-width:1170px;">
+		<div class="row">
+			<!-- 左侧菜单 Start -->
+            <div class="col-xs-2">
+                <ul id="panelbar">
+                    <li class="k-state-active">
+                    	<span class=" opacity_5"></span>
+                       form表单样例
+                        <ul>
+                            <li><a id="form_validator" href="###" onclick="get_part_by_name('form_validator.part')"><span class=" opacity_5 ml10 "></span>新增数据</a></li>
+                            <li class=""><a href="###" onclick="get_from_sample_part('form_sample.part')"><span class=" opacity_5 ml10 "></span>表单元素样例</a></li>
+                        </ul>
+                    </li>
+                    <li class="">
+                    	<span class=" opacity_5"></span>
+                        表格编辑样例
+                        <ul>
+                            <li class=""><a href="###" onclick="get_part_by_name('inline_edit.part')"><span class=" opacity_5 ml10 "></span>单行编辑</a></li>
+                            <li class=""><a href="###" onclick="get_part_by_name('batch_edit.part')"><span class=" opacity_5 ml10 "></span>批量编辑</a></li>
+                            <li class=""><a href="###" onclick="get_part_by_name('popup_edit.part')"><span class=" opacity_5 ml10 "></span>弹出层编辑</a></li>
+                        </ul>
+                    </li>
+                    <li class="">
+                    	<span class=" opacity_5"></span>
+                        表格数据展示
+                        <ul>
+                            <li class=""><a id="custom_command" href="###" onclick="get_part_by_name('custom_command.part')"><span class=" opacity_5 ml10 "></span>custom command</a></li>
+                            <li class=""><a href="###" onclick="get_part_by_name('aggregate_and_group.part')"><span class=" opacity_5 ml10 "></span>Aggregates&ampgroup</a></li>
+                            <li class=""><a href="###" onclick="get_part_by_name('column_menu.part')"><span class=" opacity_5 ml10 "></span>column_menu</a></li>
+                            <li class=""><a href="###" onclick="get_part_by_name('row_template.part')"><span class=" opacity_5 ml10 "></span>Row template</a></li>
+
+                        </ul>
+                    </li>
+                    <li class="">
+                        <span class=" opacity_5"></span>
+                        表格分页样例
+                        <ul>
+                            <li class=""><a id="headend_pagation" href="###" onclick="get_part_by_name('headend_pagation.part')"><span class=" opacity_5 ml10 mr4"></span>前台分页</a></li>
+                            <li class=""><a href="###" onclick="get_part_by_name('backend_pagation.part')"><span class=" opacity_5 ml10 mr4"></span>后台分页</a></li>
+                        </ul>
+                    </li>
+	                <li class="">
+	                    <span class=" opacity_5"></span>
+	                    表格嵌套样例
+	                    <ul>
+	                        <li class=""><a href="###" onclick="get_part_by_name('grid_hierarchy.part')"><span class="opacity_5 ml10 "></span>Hierarchy</a></li>
+	                    </ul>
+	                </li>
+	                <li class="">
+	                    <span class=" opacity_5"></span>
+	                   表格查询样例
+	                    <ul>
+	                        <li class=""><a href="###" onclick="get_part_by_name('toolbar_search.part')"><span class="opacity_5 ml10 "></span>下拉列表查询</a></li>
+	                        <li class=""><a href="###" onclick="get_part_by_name('form_search.part')"><span class="opacity_5 ml10 "></span>form查询</a></li>
+	                        <li class=""><a href="###" onclick="get_part_by_name('filter.part')"><span class="opacity_5 ml10 "></span>表格过滤</a></li>
+	                    </ul>
+	                </li>
+            	</ul>
+            </div>
+			<!-- 左侧菜单 End -->
+			<!-- 右侧内容 Start -->
+            <div class="col-xs-10">
+                <div id="test">
+                </div>
+            </div>
+            <!-- 右侧内容  End -->
+        </div>
+    </div>
+</%block>
+<script src="${STATIC_URL}js/test_kendo_grid.js"></script>
+<!-- 生成菜单  Start -->
+<script>
+ $(document).ready(function() {
+	var getItem = function (target) {
+			var itemIndexes = target.val().split(/[.,]/),
+				rootItem = panelBar.element.children("li").eq(itemIndexes[0]);
+
+			return itemIndexes.length > 1 ?
+				rootItem.find(".k-group > .k-item").eq(itemIndexes[1]) :
+				rootItem;
+		},
+		select = function (e) {
+			if (e.type != "keypress" || kendo.keys.ENTER == e.keyCode)
+				panelBar.select(getItem($("#selectIndex")));
+		},
+		append = function (e) {
+			if (e.type != "keypress" || kendo.keys.ENTER == e.keyCode)
+				panelBar.append({
+						text: $("#appendText").val()
+					}, panelBar.select());
+		},
+		before = function (e) {
+			if (e.type != "keypress" || kendo.keys.ENTER == e.keyCode)
+				panelBar.insertBefore({
+					text: $("#beforeText").val()
+				}, panelBar.select());
+		},
+		after = function (e) {
+			if (e.type != "keypress" || kendo.keys.ENTER == e.keyCode)
+				panelBar.insertAfter({
+					text: $("#afterText").val()
+				}, panelBar.select());
+		};
+
+	$(".selectItem").click(select);
+	$("#selectIndex").keypress(select);
+
+	$(".appendItem").click(append);
+	$("#appendText").keypress(append);
+
+	$(".beforeItem").click(before);
+	$("#beforeText").keypress(before);
+
+	$(".afterItem").click(after);
+	$("#afterText").keypress(after);
+
+	$(".toggleItem").click(function (e) {
+		var item = panelBar.select();
+		panelBar.enable(item, item.hasClass("k-state-disabled"));
+	});
+
+	$(".triggerItem").click(function (e) {
+		var item = panelBar.select();
+
+		if (item.hasClass("k-state-active")) {
+			panelBar.collapse(item);
+		} else {
+			panelBar.expand(item);
+		}
+	});
+
+	$(".removeItem").click(function (e) {
+		panelBar.remove(panelBar.select());
+	});
+
+});
+var panelBar = $("#panelbar").kendoPanelBar({
+	expandMode: "single" // 展开方式（一次展开一个）
+    }).data("kendoPanelBar");
+$('#form_validator').click();
+</script>
+<!-- 生成菜单  End -->

@@ -1,0 +1,147 @@
+<div id="grid"></div>
+
+<script>
+$(function(){
+    var url=site_url+'kendo_crud/grid_hierarchy/';
+    var dataSource = new kendo.data.DataSource({
+        transport: {
+                read:
+                {
+                    url:site_url+'kendo_crud/backend_pagation/',
+                    dataType:'json',
+                    type:'GET'
+                }
+        },
+        // batch: true,   //数据批量保存，更改的数据以list的形式保存,default=false
+        pageSize: 10,
+        serverPaging: true, 
+        schema: {                              
+            data:function(res){return res.data},
+            total:function(res){return res.total},
+        }
+    });
+
+    var grid=$("#grid").kendoGrid({
+        dataSource: dataSource,
+        resizable: true,
+        pageable: true,
+        sortable: true,
+        // filterable: true,
+        width:1400,
+        // scrollable: true,
+        // height: 400,
+        // toolbar: [{ name:"create",text:"新增记录"},
+        //           { name:"save",text:'保存修改'},
+        //           { name:"cancel",text:'取消'}
+        //           ],
+        detailInit: detailInit,
+        dataBound: function() {
+	        this.expandRow(this.tbody.find("tr.k-master-row").first());
+	        var tbody = $("#grid tbody").html();
+        	if(!tbody){
+	        	$($("#grid tbody").get(0)).html('<tr><td colspan="9" style="text-align: center">没有数据</td></tr>');	
+        	}
+        },
+        columns: [
+            {
+                field: "english_name",
+                title:'英文名',
+                filterable:true,
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            },           
+            {
+                field: "chinese_name",
+                title:'中文名',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            }, 
+            {
+                field: "city",
+                title:'所在城市',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            }, 
+            {
+                field: "birthday",
+                title:'出生日期',
+                width:150,
+                // format: "{0:MM/dd/yyyy}"
+                template: '#= kendo.toString(birthday,"yyyy-MM-dd") #',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            },
+            {
+                field: "age",
+                title:'年龄',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            },
+        ]
+	});
+});
+
+//子表
+function detailInit(e) {
+    $("<div/>").appendTo(e.detailCell).kendoGrid({
+        dataSource: {
+            transport: {
+                read: {
+                    url:site_url+'kendo_crud/filter_books/',
+                    dataType:'json'
+				},
+                parameterMap: function(options, operation) {
+                    return {
+                        'page': options.page,
+                        'pageSize': options.pageSize,
+                        'filters':kendo.stringify(options.filter.filters)
+					}
+				}
+            },
+            schema: {
+                data:function(res){return res.data},
+                total:function(res){return res.total},
+            },
+            serverPaging: true,
+            serverSorting: true,
+            serverFiltering: true,
+            pageSize:5,
+            //Specifies the filter operator. One of the following values "eq", "neq", "lt", "lte", "gt", "gte", "startswith", "endswith", "contains".
+            //By default, a filter object is sent to the server with the query string in the following form:
+            // filter[logic]: and
+            // filter[filters][0][field]: orderId
+            // filter[filters][0][operator]: desc
+            // filter[filters][0][value]: 10248
+            // It is possible to modify these parameters by using the parameterMap function found in the transport.
+            // filter: { field: "person_id", operator: "eq", value: e.data.id }
+            filter: { field: "english_name", operator: "eq", value: e.data.english_name}
+        },
+        scrollable: false,
+        sortable: true,
+        resizable: true,
+        pageable: true,
+        columns: [
+            // {field:"id",width:70},
+            { 
+                field: "title", 
+                title:"书名",
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            },
+            // { field: "author", title:"作者", width: 100 },
+            { 
+                field: "publication_date", 
+                title:"出版日期" ,
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            },
+            { 
+                field: "price", 
+                title: "价格",
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+             }
+		]
+    });
+}
+</script>

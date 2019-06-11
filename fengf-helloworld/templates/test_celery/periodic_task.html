@@ -1,0 +1,202 @@
+# -*- coding: utf-8 -*-
+<%inherit file="celery_base.html" />
+<%block name="cur_pos">
+	<li>&gt;</li><li class="active">周期任务</li>
+</%block>
+<%block name='celery_content'>
+	<div style="padding: 0 15px">
+		<div id="periodic_task_grid"></div>
+	</div>
+</%block>
+<script id="command_template" type="text/x-kendo-template">
+	<a type="button" class="k-button " href="${SITE_URL}test_celery/periodic_task_edit/#:id#/"><span class="k-sprite k-icon k-edit"></span>修改</a>
+	<button class="k-button " onclick="del_peroid_task('#:id#')" ><span class="k-icon k-i-close"></span>删除</button>
+	<a type="button" class="k-button" href="${SITE_URL}test_celery/periodic_task_record/#:id#/" ><span class="k-sprite k-icon k-i-search"></span>执行记录</a>
+</script>
+<script>
+function get_periodic_tasks(){
+	var dataSource = '', grid = '';
+	dataSource = new kendo.data.DataSource({
+		transport:{
+			read:{
+					url: site_url+'test_celery/get_periodic_tasks/',
+					dataType: "json",
+					type: 'GET'
+				},
+			parameterMap: function(options,operation){
+				if(operation=="read"){
+					return {
+						'page': options.page,
+						'pageSize': options.pageSize,
+					};
+				}
+				if(operation != "read" && options.models) {
+					return {
+						'operation': operation,
+						'models': kendo.stringify(options.models)
+					};
+				}
+			}
+		},
+		pageSize: 15,
+		serverPaging: true,
+		change: function(){
+			//分页扩展
+			var info = $(".k-grid-pager .info");
+			if(!info.length){
+				info = $("<span class='info mr5' style='float:right;'/>").appendTo(".k-grid-pager");
+			}
+			info.text(kendo.format("显示 {0} - {1} , 共  {2} 条",(this.page()-1)*this.pageSize()+1,
+															   Math.min(this.page()*this.pageSize(),
+															   this.total()),
+															   this.total()));
+			$('.k-pager-info.k-label').remove();
+		},
+		requestStart: function(e) {
+	    	var tbody = $("#periodic_task_grid tbody").html();
+	    	if(!tbody){
+	        	$("#periodic_task_grid .k-grid-content table").css('margin-top','50px');
+	    	}else{
+	    		$("#periodic_task_grid .k-grid-content table").css('margin-top','0px');
+	    	}
+	    },
+	    requestEnd: function(e) {
+	    	$("#periodic_task_grid .k-grid-content table").css('margin-top','0px');
+	    },
+		schema: {
+			model: {
+                  id: "id",
+                  fields: {
+                     id:{type:"string",editable: false},
+                     task:{type:"string",editable: false},
+                     args:{type:"string",editable: false},
+                     kwargs:{type:"string",editable: false},
+                     crontab:{type:"string",editable: false}
+                }
+            },
+			data: function(res){
+				if(res.result&&res.data){
+					return res.data.data_list;
+				}
+			},
+			total: function(res){
+				return res.data.total;
+			}
+		}
+	});
+	grid = $("#periodic_task_grid").kendoGrid({
+		dataSource: dataSource,
+		resizable: true,
+		pageable: true,
+        sortable: true,
+        width:1000,
+        columnMenu: true,
+		dataBound: function(){
+			        	var tbody = $("#periodic_task_grid tbody").html();
+			        	if(!tbody){
+			        	$("#periodic_task_grid tbody").html('<tr><td colspan="8" style="text-align: center">没有数据</td></tr>');
+		        	}
+		        },
+         toolbar: [
+			    {
+		      template: '<a class="k-button" href="${SITE_URL}test_celery/periodic_task_edit/0/" ><i class="k-icon k-i-plus mr5"></i>新建周期任务</a>'
+		    }
+	     ],
+		columns:[
+            {
+                field: "task",
+                title:'任务',
+                width:150,
+                headerAttributes: {
+                    style: "text-align: center"
+                    },
+                attributes:{
+                    style: "text-align: center"
+                    }
+            },
+            {
+                field: "args",
+                title:'参数(args)',
+                headerAttributes: {
+                    style: "text-align: center"
+                    },
+                attributes:{
+                    style: "text-align: center"
+                    }
+            },
+            {
+                field: "kwargs",
+                title:'参数(kwargs)',
+                headerAttributes: {
+                    style: "text-align: center"
+                    },
+                attributes:{
+                    style: "text-align: center"
+                    }
+            },
+            {
+                field: "crontab",
+                title:'Crontab 策略',
+                headerAttributes: {
+                    style: "text-align: center"
+                    },
+                attributes:{
+                    style: "text-align: center"
+                    }
+            },
+            {
+            	title:"操作" ,
+            	width:300,
+			  	headerAttributes: { style: "text-align: center" },
+                attributes:{ style: "text-align: center" },
+                template:  kendo.template($('#command_template').html())
+             }
+		]
+	});
+}
+/*
+ *操作周期任务
+*/
+function operate_peroid_task(id, content, url){
+	art.dialog({
+	    title: "提示",
+	    icon: 'warning',
+	    width: 300,
+	    lock: true,
+	    content: content,
+	    ok: function(){
+			ZENG.msgbox.show('正在载入中，请稍后...', 6, 100000);
+			$.post(url,{
+				'id': id
+			},function(data){
+				ZENG.msgbox.hide();
+				if(data.result){
+					show_msg(data.message, 2);
+					// 刷新数据
+					get_periodic_tasks();
+				}else{
+					alert_msg(data.message, 4);
+				}
+			}, 'json');
+		    },
+	    okVal: "确定",
+	    cancel: function(){},
+		cancelVal: "取消"
+	});
+
+}
+/*
+ * 删除任务
+ */
+function del_peroid_task(id){
+	var content = "确定删除该任务";
+	var url = site_url + 'test_celery/del_peroid_task/';
+	operate_peroid_task(id, content, url);
+}
+$(function(){
+	// 获取所有的周期性任务
+	get_periodic_tasks();
+});
+</script>
+
+

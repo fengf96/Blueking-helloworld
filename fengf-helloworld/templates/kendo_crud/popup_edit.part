@@ -1,0 +1,135 @@
+<div id='grid'></div>
+
+<script type="text/javascript">
+$(function(){
+    var url=site_url+'kendo_crud/popup_edit/';
+    var dataSource = new kendo.data.DataSource({
+        transport: {
+            read:
+            {
+                url:site_url+'kendo_crud/backend_pagation/',
+                dataType:'json',
+                type:'GET'
+            },
+            update:{
+                url:url,
+                dataType:'json',
+                type:'POST'
+                },
+            destroy: {
+                    url:url,
+                    dataType:'json',
+                    type:'POST'
+                },
+            create:  {
+                    url:url,
+                    dataType:'json',
+                    type:'POST'
+                },
+            parameterMap: function(options, operation) {
+                if(operation=="read"){
+                    return {
+                         page: options.page,
+                         pageSize: options.pageSize
+                    }
+                   
+                }
+                if (operation !== "read"&&options.models) {
+                    //这里的date存在时区差，与格林威治时间相差8个小
+                    //时，如果直接以date格式传递给后台，调用kendo.stringify时，
+                    //kendo内部会将GMT +0800（中国标准时间）自动转换为格林威治时间，造成时间错误
+                    //解决办法：在前台将date转换为string后传递给后台
+                    
+                    for(k=0;k<options.models.length;k++){
+                        birthday_str=date2str(options.models[k].birthday,'yyyy-MM-dd hh:mm:ss');
+                        options.models[k].birthday=birthday_str;
+                    }
+                    console.log(kendo.stringify(options));
+                    return {'operation':operation,
+                            'models': kendo.stringify(options.models)};
+                }       
+            }
+        
+        },
+        // autoSync:true, //自动同步到后台，自动提交,default=false
+        batch: true,   //数据批量保存，更改的数据以list的形式保存,default=false
+        pageSize: 10,
+        // serverFiltering: true,
+        serverPaging: true, 
+        schema: {                       
+            model: person_model,
+            data:function(res){return res.data},
+            total:function(res){return res.total},
+        }
+    });
+
+    var grid=$("#grid").kendoGrid({
+		dataSource: dataSource,
+        resizable: true,
+        pageable: true,
+        sortable: true,
+        // filterable: true,
+        width:1400,
+        // scrollable: true,
+        // height: 430,
+        dataBound: function(){
+        	var tbody = $("#grid tbody").html();
+        	if(!tbody){
+	        	$($("#grid tbody").get(0)).html('<tr><td colspan="9" style="text-align: center">没有数据</td></tr>');	
+        	}
+        },                        
+       	toolbar: [{ name:"create",text:"新增记录"}],
+        columns: [
+            {
+                field: "english_name",
+                title:'英文名',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            },
+            {
+               
+                field: "city",
+                title:'所在城市',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+                
+            } , {
+                field: "birthday",
+                title:'出生日期',
+                // format: "{0:MM/dd/yyyy}"
+                template: '#= kendo.toString(birthday,"yyyy-MM-dd") #',
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            } ,
+            {
+                field: "age",
+                title:'年龄',
+                width:50,
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            } ,
+            {
+                field: "email",
+                title: "邮箱",
+                width:200,
+                headerAttributes: {style: "text-align: center"},
+                attributes:{style: "text-align: center"}
+            },
+			{
+			    field: "tel",
+			    title:'电话',
+			    headerAttributes: {style: "text-align: center"},
+			    attributes:{style: "text-align: center"}
+			} ,
+			{ 
+			    command: [{name:"edit",text:"编辑"},{name:"destroy",text:'删除'}], 
+			    title: "操作",
+			    width:180,
+			    headerAttributes: {style: "text-align: center"},
+			    attributes:{style: "text-align: center"}
+			}
+        ],
+        editable: 'popup'
+	});
+})
+</script>
